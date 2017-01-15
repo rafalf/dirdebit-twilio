@@ -1,7 +1,7 @@
 from twilio.rest import TwilioRestClient
 
 cfg = {}
-with open('creds.cfg') as hlr:
+with open('alerts.conf') as hlr:
     for line in hlr:
         split_line = line.split('::')
         cfg[split_line[0].strip()] = split_line[1].strip()

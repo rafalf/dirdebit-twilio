@@ -16,7 +16,7 @@ logger = logging.getLogger('alert')
 
 # config file
 cfg = {}
-with open('creds.cfg') as hlr:
+with open('alerts.conf') as hlr:
     for line in hlr:
         split_line = line.split('::')
         cfg[split_line[0].strip()] = split_line[1].strip()
@@ -92,9 +92,8 @@ def alert():
                 el = driver.find_element_by_css_selector(item)
                 line_= el.text.strip()
                 logger.info(line_)
-                if line_.count('Success') or line_.count('Written-Off'):
-                    # break  UNCOMMENT !!!
-                    pass
+                if line_.count('Success') or line_.count('Written-Off') and cfg['test'].lower() != 'true':
+                        break
                 elif line_.count('Failed'):
                     for td_ in range(2, 5):
                         it_ = ".debit-details:nth-of-type({})>td:nth-of-type({})".format(row_, td_)
@@ -106,7 +105,7 @@ def alert():
                     # all data retrieved
                     # add to people to alert
                     ppl_to_alert.append(person_to_alert)
-                    logger.info('Add user to alert list: {}'.format(person_to_alert))
+                    logger.info('user added to alert list: {}'.format(person_to_alert))
                     break
 
             _navigate_to_customer_page()
@@ -185,81 +184,81 @@ def _get_email(name_):
     try:
         with open('users.csv', 'rb') as hlr:
             rd = csv.reader(hlr, delimiter=',', quotechar='"')
-            users_ = [row for row in rd if row[1] != "Name"]
-        for user_ in users_:
-            if user_[0] == name_ and user_[1] != '':
-                logger.debug('Email found: {}  for user: {}'.format(user_[1], user_[0]))
-                return user_[1]
+            users_csv = [row for row in rd if row[1] != "Name"]
+        for user_csv in users_csv:
+            if user_csv[0] == name_ and user_csv[1] != '':
+                logger.debug('Email found: {}  for user: {}'.format(user_csv[1], user_csv[0]))
+                return user_csv[1]
         else:
-            logger.debug('Email not found for: {}'.format(user_[0]))
+            logger.debug('Email not found for: {}'.format(name_))
     except:
         logger.error('_get_email failed: ', exc_info=True)
 
 
 def _text_message(text_recipient):
-    logger.debug('Texting: {}'.format(text_recipient))
+    logger.info('Texting: {}'.format(text_recipient))
 
-    # recipient
+    # recipient phone number
+    phone_number = "+61" + text_recipient[2][1:]
+
     if cfg['test'].lower() == 'true':
-        msg_recipient = cfg['twilio_to_test']
-        logger.debug('Test mode text recipient: {}'.format(msg_recipient))
-        logger.debug('Intended recipient: {}'.format(text_recipient[2][1:]))
-    else:
-        msg_recipient = text_recipient[2][1:]
+        logger.debug('Intended recipient: {}'.format(phone_number))
+        phone_number = cfg['twilio_to_test']
+        logger.debug('Test mode, text recipient: {}'.format(phone_number))
 
     acc = cfg['twilio_account']
     token = cfg['twilio_token']
     from_number = cfg['twilio_from']
+    text_content = cfg['text_content']
 
     try:
         client = TwilioRestClient(acc, token)
 
-        message = client.messages.create(to=msg_recipient, from_=from_number,
-                                         body="Hello --> This is me testing! :D")
+        message = client.messages.create(to=phone_number, from_=from_number,
+                                         body=text_content)
         sid = message.sid
-
         body = client.messages.get(sid)
         status = body.status
-        logger.info('Message sent to: {}, status: {}'.format(msg_recipient, status))
+        logger.info('Message sent to: {}, status: {}'.format(phone_number, status))
     except:
-        logger.error('Text message failed to send to: {}'.format(msg_recipient), exc_info=True)
+        logger.error('Text message failed to send to: {}'.format(phone_number), exc_info=True)
 
 
-def _send_email(email_recipient):
-    logger.debug('Emailing: {}'.format(email_recipient))
+def _send_email(recipient):
+    logger.debug('Emailing: {}'.format(recipient))
 
     # recipient
+    name_recipient = recipient[0]
+    email_recipient = recipient[6]
+
     if cfg['test'].lower() == 'true':
-        recipient = cfg['gmail_user']
-        logger.debug('Test mode email recipient: {}'.format(recipient))
-        logger.debug('Intended recipient: {}'.format(email_recipient[2][1:]))
-    else:
-        recipient = email_recipient[6]
+        logger.debug('Intended recipient: {}'.format(email_recipient))
+        email_recipient = cfg['gmail_user']
+        logger.debug('Test mode, email recipient: {}'.format(email_recipient))
 
     if not recipient:
-        logger.info('Email not provided, not sent out: {}'.format(email_recipient[0]))
+        logger.info('Email not provided, not sent out to: {}'.format(name_recipient))
         return
-    elif cfg['gmail_method'] == 'less-secure':
 
+    if cfg['gmail_method'] == 'less-secure':
         gmail_user = cfg['gmail_user']
         gmail_pwd = cfg['gmail_pwd']
         email_sender = cfg['gmail_user']
-        email_subject = 'Payment failed'
-        email_text = 'Dear Sirs.... Test'
+        email_subject = cfg['email_subject']
+        email_content = cfg['email_content']
 
-        # Prepare actual message
         message = """From: %s\nTo: %s\nSubject: %s\n\n%s
-        """ % (email_sender, ", ".join(recipient), email_subject, email_text)
+        """ % (email_sender, email_recipient, email_subject, email_content)
         try:
             server = smtplib.SMTP("smtp.gmail.com", 587)
             server.ehlo()
             server.starttls()
             server.login(gmail_user, gmail_pwd)
-            server.sendmail(email_sender, recipient, message)
+            server.sendmail(email_sender, email_recipient, message)
             server.close()
-            logger.info('Email sent to: {}'.format(recipient))
+            logger.info('Email sent to: {}'.format(email_recipient))
         except:
-            logger.error('Email failed to send to: {}'.format(recipient), exc_info=True)
+            logger.error('Email failed to send to: {}'.format(email_recipient), exc_info=True)
 
 
 if __name__ == '__main__':

@@ -10,5 +10,8 @@ pass::PASSWORD
 gmail_user::GMAIL_USER
 gmail_pwd::GMAIL_PASSWORD
 gmail_method::less-secure
-test::true
+test::false
 browser::Chrome
+email_content::Email message. Your direct debit failed.
+email_subject::Email subject
+text_content::Texting you
