@@ -1,11 +1,11 @@
 ## Installation:
 * install python 2.7.12
-* add C:\Python27 and C:\Python27\Scripts to the system env variables
+* add C:\Python27 and C:\Python27\Scripts to the system Path env variable
 * pip install -U selenium
 * pip install twilio
 
 ## Files:
-__users.csv__
+__users.csv__  
 * In this file we keep users email addresses.
 In the future, we'll use it to turn off, on alerts for a particular user.
 
