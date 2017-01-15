@@ -3,8 +3,8 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from twilio.rest import TwilioRestClient
 import logging
-from read_cfg import read_cfg
 import os
 import time
 import getopt
@@ -13,8 +13,22 @@ import csv
 import smtplib
 
 logger = logging.getLogger('alert')
-cfg = read_cfg()
-driver = webdriver.Chrome()
+
+# config file
+cfg = {}
+with open('creds.cfg') as hlr:
+    for line in hlr:
+        split_line = line.split('::')
+        cfg[split_line[0].strip()] = split_line[1].strip()
+
+# driver
+if cfg['browser'] == 'Chrome-OSX':
+    driver = webdriver.Chrome()
+elif cfg['browser'] == 'Chrome':
+    driver_path = os.path.join(os.path.dirname(__file__), 'chromedriver.exe')
+    driver = webdriver.Chrome(driver_path)
+    driver.maximize_window()
+
 whl = "#busyindicator svg"
 
 
@@ -66,7 +80,7 @@ def alert():
             time.sleep(2)
             _document_ready()
 
-            logger.info("Fetching users direct debits: {}".format(person_to_alert[0]))
+            logger.info("Fetching user direct debits: {}".format(person_to_alert[0]))
 
             tbl_tr_ = '.clickable-table .debit-details'
             els_ = WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, tbl_tr_)))
@@ -92,6 +106,7 @@ def alert():
                     # all data retrieved
                     # add to people to alert
                     ppl_to_alert.append(person_to_alert)
+                    logger.info('Add user to alert list: {}'.format(person_to_alert))
                     break
 
             _navigate_to_customer_page()
@@ -102,7 +117,7 @@ def alert():
             # user name and date
             # if match we dont send out
             if prs_[0] == csv_alert[0] and prs_[5] == csv_alert[5]:
-                logger.info('Alert already sent: {}'.format(prs_))
+                logger.info('Alert already sent: {} on: {}. Ignoring.'.format(prs_[0], csv_alert[5]))
                 break
         else:
             _text_message(prs_)
@@ -188,22 +203,41 @@ def _text_message(text_recipient):
     if cfg['test'].lower() == 'true':
         msg_recipient = cfg['twilio_to_test']
         logger.debug('Test mode text recipient: {}'.format(msg_recipient))
+        logger.debug('Intended recipient: {}'.format(text_recipient[2][1:]))
     else:
         msg_recipient = text_recipient[2][1:]
 
+    acc = cfg['twilio_account']
+    token = cfg['twilio_token']
+    from_number = cfg['twilio_from']
 
-def _send_email(user__):
-    logger.debug('Emailing: {}'.format(user__))
+    try:
+        client = TwilioRestClient(acc, token)
+
+        message = client.messages.create(to=msg_recipient, from_=from_number,
+                                         body="Hello --> This is me testing! :D")
+        sid = message.sid
+
+        body = client.messages.get(sid)
+        status = body.status
+        logger.info('Message sent to: {}, status: {}'.format(msg_recipient, status))
+    except:
+        logger.error('Text message failed to send to: {}'.format(msg_recipient), exc_info=True)
+
+
+def _send_email(email_recipient):
+    logger.debug('Emailing: {}'.format(email_recipient))
 
     # recipient
     if cfg['test'].lower() == 'true':
         recipient = cfg['gmail_user']
         logger.debug('Test mode email recipient: {}'.format(recipient))
+        logger.debug('Intended recipient: {}'.format(email_recipient[2][1:]))
     else:
-        recipient = user__[6]
+        recipient = email_recipient[6]
 
     if not recipient:
-        logger.info('Email not provided, hence not sent out: {}'.format(user__[0]))
+        logger.info('Email not provided, not sent out: {}'.format(email_recipient[0]))
         return
     elif cfg['gmail_method'] == 'less-secure':
 
@@ -232,8 +266,7 @@ if __name__ == '__main__':
     verbose = None
 
     timestamp = time.strftime('%d%m%y', time.localtime())
-    log_file = os.path.join(os.path.dirname(__file__), 'logs',
-                            timestamp + ".log")
+    log_file = os.path.join(os.path.dirname(__file__), timestamp + ".log")
     file_hndlr = logging.FileHandler(log_file)
     logger.addHandler(file_hndlr)
     console = logging.StreamHandler(stream=sys.stdout)

@@ -1,11 +1,15 @@
-from read_cfg import read_cfg
 from twilio.rest import TwilioRestClient
 
-conf = read_cfg()
-acc = conf['twilio_account']
-token = conf['twilio_token']
-from_number = conf['twilio_from']
-to_number = conf['twilio_to_test']
+cfg = {}
+with open('creds.cfg') as hlr:
+    for line in hlr:
+        split_line = line.split('::')
+        cfg[split_line[0].strip()] = split_line[1].strip()
+
+acc = cfg['twilio_account']
+token = cfg['twilio_token']
+from_number = cfg['twilio_from']
+to_number = cfg['twilio_to_test']
 
 client = TwilioRestClient(acc, token)
 
