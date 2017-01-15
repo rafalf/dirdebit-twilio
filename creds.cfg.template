@@ -1,0 +1,12 @@
+twilio_account::ACCOUNT_ID
+twilio_token::TOKEN
+twilio_from::TWILIO_MESSGAGE_SENDER
+twilio_to_test::TEST_TWILIO_NUMBER
+site_url::https://hello.ezypay.com
+customers_url::https://hello.ezypay.com/Home#/customers
+code::LOGIN_CODE
+username::USERNAME
+pass::PASSWORD
+gmail_user::GMAIL_USER
+gmail_pwd::GMAIL_PASSWORD
+gmail_method::less-secure
