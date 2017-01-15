@@ -5,15 +5,24 @@
 * pip install twilio
 
 __users.csv__
-In this file we keep users email addresses
-also in the future, we'll use it to turn off, on alerts for a particular user
+In this file we keep users email addresses.
+In the future, we'll use it to turn off, on alerts for a particular user.
 
 __alerts.csv__
-we save all alerts that have been sent out in this file in order to keep
+We save all alerts that have been sent out in this file in order to keep
 track of them.
 
 __creds.cfg.template__
-this is a template for alerts.conf, so rename the file and fill in the required settings
+this is a template for alerts.conf, so rename the file and fill in the required settings.
+
+__twilio_.py__  
+The file is sued only for testing purposes to test twilio.
+
+## Run:
+python run_alert.py
+
+in verbose mode:
+python run_alert.py --verbose
 
 ## Links:
 
