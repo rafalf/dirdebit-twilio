@@ -10,3 +10,5 @@ pass::PASSWORD
 gmail_user::GMAIL_USER
 gmail_pwd::GMAIL_PASSWORD
 gmail_method::less-secure
+test::true
+browser::Chrome
