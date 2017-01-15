@@ -15,7 +15,7 @@ track of them.
 __creds.cfg.template__
 this is a template for alerts.conf, so rename the file and fill in the required settings.
 
-__twilio_.py__  
+__twilio_.py__
 The file is sued only for testing purposes to test twilio.
 
 ## Run:
@@ -23,6 +23,12 @@ python run_alert.py
 
 in verbose mode:
 python run_alert.py --verbose
+
+When the script starts, it launches the Chrome browser and fetches all user data
+and sends emails, text messages accordingly.
+Phone numbers are retrieved from the web app, however email addresses must be
+provided in the users.csv file
+
 
 ## Links:
 
