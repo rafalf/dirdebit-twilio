@@ -20,7 +20,8 @@ __creds.cfg.template__
 __twilio_.py__
 * The file is used only for testing purposes to test twilio.
 
-__alerts.csv__
+__alerts.conf__
+</br>
 To run the script in the test mode: __test::true__ 
 </br>
 The test mode means that all emails, text messages will be sent out to: __twilio_to_test__ phone number,  __gmail_user__
