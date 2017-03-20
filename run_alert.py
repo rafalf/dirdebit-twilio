@@ -270,7 +270,7 @@ if __name__ == '__main__':
     logger.addHandler(file_hndlr)
     console = logging.StreamHandler(stream=sys.stdout)
     logger.addHandler(console)
-    ch = logging.Formatter('[%(levelname)s] %(message)s')
+    ch = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
     console.setFormatter(ch)
     file_hndlr.setFormatter(ch)
 
@@ -286,6 +286,8 @@ if __name__ == '__main__':
         logger.setLevel(logging.getLevelName('DEBUG'))
     else:
         logger.setLevel(logging.getLevelName('INFO'))
+
+    logger.info('Alert script started.')
     logger.debug('CLI args: {}'.format(opts))
     alert()
     driver.quit()
