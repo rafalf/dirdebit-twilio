@@ -1,13 +1,14 @@
 ## Installation:
 * install python 2.7.12
-* add C:\Python27 and C:\Python27\Scripts to the system env variables
+* add C:\Python27 and C:\Python27\Scripts to the system Path env variable
 * pip install -U selenium
 * pip install twilio
 
 ## Files:
-__users.csv__
-* In this file we keep users email addresses.
-In the future, we'll use it to turn off, on alerts for a particular user.
+__users.csv__  
+* In this file we keep users email addresses. So to set the script up correctly and run in the real-live mode, we need to enter all users and their emails into this file.
+
+TODO: In the future, we'll use it to turn off, on alerts for a particular user.
 
 __alerts.csv__
 * We save all alerts that have been sent out in this file in order to keep
@@ -18,6 +19,14 @@ __creds.cfg.template__
 
 __twilio_.py__
 * The file is used only for testing purposes to test twilio.
+
+__alerts.conf__
+</br>
+To run the script in the test mode: __test::true__ 
+</br>
+The test mode means that all emails, text messages will be sent out to: __twilio_to_test__ phone number,  __gmail_user__
+</br>
+To run the script in the real-live mode: __test::false__
 
 ## Run:
 python run_alert.py
