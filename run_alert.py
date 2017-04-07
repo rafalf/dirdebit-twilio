@@ -110,6 +110,7 @@ def alert():
 
             _navigate_to_customer_page()
 
+    logger.info('reading all alerts')
     csv_ = _read_alerts()
     for prs_ in ppl_to_alert:
         for csv_alert in csv_:
@@ -119,6 +120,7 @@ def alert():
                 logger.info('Alert already sent: {} on: {}. Ignoring.'.format(prs_[0], csv_alert[5]))
                 break
         else:
+            logger.info('Alert not sent yet to: {}'.format(prs_[0]))
             _text_message(prs_)
             _send_email(prs_)
             _write_alert(prs_)
@@ -200,6 +202,7 @@ def _text_message(text_recipient):
 
     # recipient phone number
     phone_number = "+61" + text_recipient[2][1:]
+    logger.info('Phone number: {}'.format(phone_number))
 
     if cfg['test'].lower() == 'true':
         logger.debug('Intended recipient: {}'.format(phone_number))
@@ -222,6 +225,20 @@ def _text_message(text_recipient):
         logger.info('Message sent to: {}, status: {}'.format(phone_number, status))
     except:
         logger.error('Text message failed to send to: {}'.format(phone_number), exc_info=True)
+
+    logger.info('Sending a copy of message to: {}'.format(from_number))
+
+    try:
+        client = TwilioRestClient(acc, token)
+
+        message = client.messages.create(to=from_number, from_=from_number,
+                                         body=text_content)
+        sid = message.sid
+        body = client.messages.get(sid)
+        status = body.status
+        logger.info('Message sent to: {}, status: {}'.format(from_number, status))
+    except:
+        logger.error('Text message failed to send to: {}'.format(from_number), exc_info=True)
 
 
 def _send_email(recipient):
